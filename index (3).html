@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>5(Oh!)등급 계산기</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 2em;
+    }
+    h1 {
+      color: #2c3e50;
+    }
+    p {
+      color: #555;
+    }
+    table {
+      border-collapse: collapse;
+      margin-top: 1em;
+      background: white;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 0.7em;
+      text-align: center;
+    }
+    th {
+      background-color: #d5f5e3;
+    }
+    input[type="number"] {
+      width: 80px;
+      padding: 0.3em;
+      background-color: #fcf8e3;
+      border: 1px solid #ccc;
+      text-align: right;
+    }
+    tfoot td {
+      background: #eee;
+      text-align: center;
+      font-size: 0.9em;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>5(Oh!)등급 계산기</h1>
+  <p>9등급제의 내신 점수를 소수점 둘째자리까지 입력하면 5등급으로 환산합니다.<br>
+     반대로 5등급의 내신 점수를 소수점 둘째자리까지 입력하면 9등급으로 환산합니다.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>9등급제 입력등급</th>
+        <th>환산 백분위 (9→5)</th>
+        <th>5등급제 환산 등급</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><input id="g9" type="number" step="0.01" oninput="convertTo5()"></td>
+        <td id="p95"></td>
+        <td id="g5"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table>
+    <thead>
+      <tr>
+        <th>5등급제 입력등급</th>
+        <th>환산 백분위 (5→9)</th>
+        <th>9등급제 환산 등급</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><input id="g5in" type="number" step="0.01" oninput="convertTo9()"></td>
+        <td id="p59"></td>
+        <td id="g9out"></td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr><td colspan="3">약간의 수치적 오류가 있을 수 있습니다. 참고만 해주세요.</td></tr>
+    </tfoot>
+  </table>
+
+  <p style="text-align:right; color:#999; margin-top:2em;">제작자 : 대전외국어고등학교 교사 전태환</p>
+
+  <script>
+    const lowerBound9 = [0, 4, 11, 23, 40, 60, 77, 89, 96, 100];
+    const lowerBound5 = [0, 10, 34, 66, 90, 100];
+
+    function interpolateGradeToPercent(x, bounds) {
+      const i = Math.floor(x) - 1;
+      if (i < 0) return bounds[0];
+      if (i >= bounds.length - 1) return bounds[bounds.length - 1];
+      const ratio = x - (i + 1);
+      return bounds[i] + ratio * (bounds[i + 1] - bounds[i]);
+    }
+
+    function reversePercentToGrade(p, bounds) {
+      for (let i = 0; i < bounds.length - 1; i++) {
+        if (p >= bounds[i] && p <= bounds[i + 1]) {
+          const ratio = (p - bounds[i]) / (bounds[i + 1] - bounds[i]);
+          return i + 1 + ratio;
+        }
+      }
+      return bounds.length - 1;
+    }
+
+    function convertTo5() {
+      const g9 = parseFloat(document.getElementById("g9").value);
+      if (isNaN(g9)) return;
+      const p = interpolateGradeToPercent(g9, lowerBound9);
+      const g5 = reversePercentToGrade(p, lowerBound5);
+      document.getElementById("p95").innerText = p.toFixed(2);
+      document.getElementById("g5").innerText = Math.min(5, g5).toFixed(2);
+    }
+
+    function convertTo9() {
+      const g5 = parseFloat(document.getElementById("g5in").value);
+      if (isNaN(g5)) return;
+      const p = interpolateGradeToPercent(g5, lowerBound5);
+      const g9 = reversePercentToGrade(p, lowerBound9);
+      document.getElementById("p59").innerText = p.toFixed(2);
+      document.getElementById("g9out").innerText = Math.min(9, g9).toFixed(2);
+    }
+  </script>
+</body>
+</html>
